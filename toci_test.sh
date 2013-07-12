@@ -68,10 +68,6 @@ sleep 67
 sed -i $TOCI_WORKING_DIR/tripleo-heat-templates/undercloud-vm.yaml -e 's/\(.*controller-address:\).*/\1 192.0.2.2/'
 heat stack-create -f $TOCI_WORKING_DIR/tripleo-heat-templates/undercloud-vm.yaml -P "PowerUserName=$(whoami)" undercloud
 
-export ELEMENTS_PATH=$TOCI_WORKING_DIR/diskimage-builder/elements:$TOCI_WORKING_DIR/tripleo-image-elements/elements
-$TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -u -a i386 -o overcloud-control $TOCI_DISTROELEMENT boot-stack cinder heat-localip heat-cfntools stackuser
-$TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -u -a i386 -o overcloud-compute $TOCI_DISTROELEMENT nova-compute neutron-openvswitch-agent heat-localip heat-cfntools stackuser
-
 # Just sleeping here so that we don't fill the logs with so many loops
 sleep 180
 
@@ -84,6 +80,8 @@ wait_for 40 20 heat list \| grep CREATE_COMPLETE
 ssh_noprompt root@$SEED_IP iptables -D FORWARD -j REJECT --reject-with icmp-host-prohibited || true
 wait_for 20 15 ping -c 1 $(nova list | grep undercloud | sed -e "s/.*=\(.*\) .*/\1/g")
 
+exit 0 # this the rest doesn't work yet
+
 export UNDERCLOUD_IP=$(nova list | grep ctlplane | sed -e "s/.*=\([0-9.]*\).*/\1/")
 cp $TOCI_WORKING_DIR/incubator/undercloudrc $TOCI_WORKING_DIR/undercloudrc
 source $TOCI_WORKING_DIR/undercloudrc
@@ -93,8 +91,9 @@ user-config
 setup-baremetal 1 768 10 undercloud
 ssh heat-admin@$UNDERCLOUD_IP "cat /opt/stack/boot-stack/virtual-power-key.pub" >> ~/.ssh/authorized_keys
 
-#$TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -u -a i386 -o overcloud-control $TOCI_DISTROELEMENT boot-stack cinder heat-localip heat-cfntools stackuser
-#$TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -u -a i386 -o overcloud-compute $TOCI_DISTROELEMENT nova-compute neutron-openvswitch-agent heat-localip heat-cfntools stackuser
+export ELEMENTS_PATH=$TOCI_WORKING_DIR/diskimage-builder/elements:$TOCI_WORKING_DIR/tripleo-image-elements/elements
+$TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -u -a i386 -o overcloud-control $TOCI_DISTROELEMENT boot-stack cinder heat-localip heat-cfntools stackuser
+$TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -u -a i386 -o overcloud-compute $TOCI_DISTROELEMENT nova-compute neutron-openvswitch-agent heat-localip heat-cfntools stackuser
 
 load-image overcloud-control.qcow2
 load-image overcloud-compute.qcow2

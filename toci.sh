@@ -106,5 +106,7 @@ fi
 declare | grep -e "^PATH=" -e "^http.*proxy" -e "^TOCI_" -e '^DIB_' | sed  -e 's/^/export /g' > $TOCI_WORKING_DIR/toci_env
 echo 'export no_proxy=$($TOCI_WORKING_DIR/incubator/scripts/get-vm-ip seed)' >> $TOCI_WORKING_DIR/toci_env
 
-echo $STATUS
+if [ $STATUS != 0 ] ; then
+    echo ERROR
+fi
 exit $STATUS
