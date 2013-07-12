@@ -1,16 +1,16 @@
 #!/usr/bin/env bash
 
 get_get_repo(){
-    CACHDIR=$TOCI_CACHE_DIR/${1/[^\/]*\//}
+    CACHDIR=$TOCI_WORKING_DIR/${1/[^\/]*\//}
     if [ ! -e $CACHDIR ] ; then
         git clone https://github.com/$1.git $CACHDIR
+        repo_basename=${1#*/}
+        apply_patches ${repo_basename} ${repo_basename}*
     else
         pushd $CACHDIR
         git fetch
-        git reset --hard origin/master
         popd
     fi
-    cp -r $CACHDIR $TOCI_WORKING_DIR/${1/[^\/]*\//}
 }
 
 ssh_noprompt(){

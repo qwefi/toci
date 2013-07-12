@@ -8,11 +8,12 @@ export TOCI_SOURCE_DIR=$PWD
 # env specific to this run, can contain
 # TOCI_RESULTS_SERVER, http_proxy, TOCI_UPLOAD, TOCI_REMOVE,
 source ~/.toci
+source tocirc
 
 export TOCI_GIT_CHECKOUT
 
-# All temp files should go here
-export TOCI_WORKING_DIR=${TOCI_WORKING_DIR:-$(mktemp -d --tmpdir toci_working_XXXXXXX)}
+# All tock working files should go here
+export TOCI_WORKING_DIR=${TOCI_WORKING_DIR:-/opt/toci}
 mkdir -p $TOCI_WORKING_DIR
 # Any files to be uploaded to results server goes here
 export TOCI_LOG_DIR=${TOCI_LOG_DIR:-$(mktemp -d --tmpdir toci_logs_XXXXXXX)}
@@ -42,6 +43,17 @@ STATUS=0
 
 mark_time Starting git
 timeout --foreground 60m ./toci_git.sh > $TOCI_LOG_DIR/git.out 2>&1 || STATUS=1
+
+
+# set d-i-b env variables to fetch git repositories from local caches
+for repo in $TOCI_WORKING_DIR/*/.git ; do
+    repo_dir=$(dirname $repo)
+    repo_name=$(basename $repo_dir)
+    if [[ "^(incubator|bm_poseur|diskimage-builder|tripleo-image-elements|tripleo-heat-templates)$" =~ "$repo_name" ]] ; then
+        continue
+    fi
+    export DIB_REPOLOCATION_$repo_name=$repo_dir
+done
 
 # Add incubator scripts to path
 export PATH=$PATH:$TOCI_WORKING_DIR/incubator/scripts

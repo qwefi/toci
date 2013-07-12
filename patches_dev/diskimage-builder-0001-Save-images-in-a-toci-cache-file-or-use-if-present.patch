@@ -24,7 +24,7 @@ index d71fa26..4413faa 100755
  
  IMAGE_NAME=${IMAGE_NAME%%\.${IMAGE_TYPE}}
  
-+CACHEFILE=$TOCI_CACHE_DIR/$(basename $IMAGE_NAME.$IMAGE_TYPE)
++CACHEFILE=$TOCI_WORKING_DIR/image_cache/$(basename $IMAGE_NAME.$IMAGE_TYPE)
 +if [ -e $CACHEFILE ] ; then
 +    echo Using $CACHEFILE
 +    cp $CACHEFILE $IMAGE_NAME.$IMAGE_TYPE
@@ -39,7 +39,7 @@ index d71fa26..4413faa 100755
  compress_image
  save_image $IMAGE_NAME.$IMAGE_TYPE
 +
-+cp $IMAGE_NAME.$IMAGE_TYPE $TOCI_CACHE_DIR/$(basename $IMAGE_NAME.$IMAGE_TYPE)
++cp $IMAGE_NAME.$IMAGE_TYPE $TOCI_WORKING_DIR/image_cache/$(basename $IMAGE_NAME.$IMAGE_TYPE)
 +
 diff --git a/elements/base/dib-first-boot b/elements/base/dib-first-boot
 index 1e39860..c13a930 100755
