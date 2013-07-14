@@ -72,3 +72,8 @@ send_irc(){
 
     cat <&3 > /dev/null
 }
+
+ERROR(){
+    echo $@
+    exit 1
+}

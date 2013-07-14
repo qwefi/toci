@@ -2,6 +2,14 @@
 
 . toci_functions.sh
 
+patch -v > /dev/null 2>&1 || ERROR "Please install patch"
+make -v > /dev/null 2>&1 || ERROR "Please install make"
+python -c 'import yaml' > /dev/null 2>&1 || ERROR "Please install PyYAML"
+# TODO : why do I need to do this, heat client complains without it
+python -c 'import keystoneclient' || ERROR "Please install python-keystoneclient"
+export PYTHONPATH=$(python -c 'import keystoneclient; print keystoneclient.__file__.rsplit("/", 1)[0]'):$PYTHONPATH
+
+
 export STARTTIME=$(date)
 export TOCI_SOURCE_DIR=$PWD
 
