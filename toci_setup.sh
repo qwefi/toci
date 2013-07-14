@@ -37,4 +37,4 @@ sed -i "s/\"user\": \"stack\",/\"user\": \"`whoami`\",/" $TOCI_WORKING_DIR/tripl
 EXTRA_ELEMENTS=$TOCI_DISTROELEMENT $TOCI_WORKING_DIR/incubator/scripts/boot-seed-vm
 
 export ELEMENTS_PATH=$TOCI_WORKING_DIR/diskimage-builder/elements:$TOCI_WORKING_DIR/tripleo-image-elements/elements
-$TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -u -a $TOCI_DIB_ARCH -o $TOCI_WORKING_DIR/undercloud $TOCI_DISTROELEMENT boot-stack nova-baremetal heat-localip heat-cfntools stackuser
+$TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -a $TOCI_DIB_ARCH -o $TOCI_WORKING_DIR/undercloud $TOCI_DISTROELEMENT boot-stack nova-baremetal heat-localip heat-cfntools stackuser tocihelper

@@ -33,7 +33,7 @@ if [ -n "$TOCI_MACS" ]; then
     COUNT=$(( $COUNT + 1 ))
   done
 else
-  create-nodes 1 768 10 3
+  create-nodes 1 768 10 5
   export MACS=$($TOCI_WORKING_DIR/bm_poseur/bm_poseur get-macs)
   setup-baremetal 1 768 10 seed
 fi
@@ -80,35 +80,57 @@ wait_for 40 20 heat list \| grep CREATE_COMPLETE
 ssh_noprompt root@$SEED_IP iptables -D FORWARD -j REJECT --reject-with icmp-host-prohibited || true
 wait_for 20 15 ping -c 1 $(nova list | grep undercloud | sed -e "s/.*=\(.*\) .*/\1/g")
 
-exit 0 # this the rest doesn't work yet
-
 export UNDERCLOUD_IP=$(nova list | grep ctlplane | sed -e "s/.*=\([0-9.]*\).*/\1/")
 cp $TOCI_WORKING_DIR/incubator/undercloudrc $TOCI_WORKING_DIR/undercloudrc
 source $TOCI_WORKING_DIR/undercloudrc
 export no_proxy=$no_proxy,$UNDERCLOUD_IP
 
+export ELEMENTS_PATH=$TOCI_WORKING_DIR/diskimage-builder/elements:$TOCI_WORKING_DIR/tripleo-image-elements/elements
+# TODO : add back cinder
+$TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -a i386 -o overcloud-control $TOCI_DISTROELEMENT boot-stack heat-localip heat-cfntools stackuser tocihelper
+
+# wait for a successfull os-refresh-config
+wait_for 60 10 ssh_noprompt heat-admin@$UNDERCLOUD_IP ls /opt/stack/boot-stack.ok
+
+# Make sure nova has had a chance to start responding to requests
+wait_for 10 5 nova list
+
 user-config
 setup-baremetal 1 768 10 undercloud
 ssh heat-admin@$UNDERCLOUD_IP "cat /opt/stack/boot-stack/virtual-power-key.pub" >> ~/.ssh/authorized_keys
 
-export ELEMENTS_PATH=$TOCI_WORKING_DIR/diskimage-builder/elements:$TOCI_WORKING_DIR/tripleo-image-elements/elements
-$TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -u -a i386 -o overcloud-control $TOCI_DISTROELEMENT boot-stack cinder heat-localip heat-cfntools stackuser
-$TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -u -a i386 -o overcloud-compute $TOCI_DISTROELEMENT nova-compute neutron-openvswitch-agent heat-localip heat-cfntools stackuser
+$TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -a i386 -o overcloud-compute $TOCI_DISTROELEMENT nova-compute neutron-openvswitch-agent heat-localip heat-cfntools stackuser nova-kvm tocihelper
+
+if [ -d /var/log/upstart ]; then
+    wait_for 40 10 ssh_noprompt heat-admin@$UNDERCLOUD_IP grep 'record\\ updated\\ for' /var/log/upstart/nova-compute.log -A 100 \| grep \'Updating host status\'
+else
+    wait_for 40 10 ssh_noprompt heat-admin@$UNDERCLOUD_IP sudo journalctl _SYSTEMD_UNIT=nova-compute.service \| grep \'record updated for\' -A 100 \| grep \'Updating host status\'
+fi
+
+sleep 67
 
 load-image overcloud-control.qcow2
 load-image overcloud-compute.qcow2
 
 make -C $TOCI_WORKING_DIR/tripleo-heat-templates overcloud.yaml
-heat stack-create -f $TOCI_WORKING_DIR/tripleo-heat-templates/overcloud.yaml overcloud
+heat stack-create -f $TOCI_WORKING_DIR/tripleo-heat-templates/overcloud.yaml overcloud -P 'notcomputeImage=overcloud-control'
 
-export OVERCLOUD_IP=$(nova list | grep ctlplane | sed -e "s/.*=\([0-9.]*\).*/\1/")
-cp $TOCI_WORKING_DIR/incubator/overcloudrc $TOCI_WORKING_DIR/overcloudrc
+sleep 161
+
+wait_for 40 20 heat list \| grep CREATE_COMPLETE
+
+export OVERCLOUD_IP=$(nova list | grep ctlplane | grep notcompute | sed -e "s/.*=\([0-9.]*\).*/\1/")
+sed -e 's/UNDERCLOUD_IP/OVERCLOUD_IP/g' ./incubator/undercloudrc > overcloudrc
 source $TOCI_WORKING_DIR/overcloudrc
 export no_proxy=$no_proxy,$OVERCLOUD_IP
-user-config
-$TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -u -a i386 -o user $TOCI_DISTROELEMENT
-glance image-create --name user --public --disk-format qcow2 --container-format bare --file user.qcow2
-nova boot -k default --flavor m1.tiny --image user
 
+# wait for a successfull os-refresh-config
+ssh_noprompt heat-admin@$UNDERCLOUD_IP sudo iptables -D FORWARD -j REJECT --reject-with icmp-host-prohibited || true
+wait_for 60 10 ssh_noprompt heat-admin@$OVERCLOUD_IP ls /opt/stack/boot-stack.ok
+
+# Make sure nova has had a chance to start responding to requests
+wait_for 10 5 nova list
+
+user-config
 
 
