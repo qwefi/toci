@@ -87,7 +87,7 @@ export no_proxy=$no_proxy,$UNDERCLOUD_IP
 
 export ELEMENTS_PATH=$TOCI_WORKING_DIR/diskimage-builder/elements:$TOCI_WORKING_DIR/tripleo-image-elements/elements
 # TODO : add back cinder
-$TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -a i386 -o overcloud-control $TOCI_DISTROELEMENT boot-stack heat-localip heat-cfntools neutron-network-node stackuser tocihelper
+$TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -a i386 -o overcloud-control $TOCI_DISTROELEMENT boot-stack heat-localip heat-cfntools stackuser tocihelper
 
 # wait for a successfull os-refresh-config
 wait_for 60 10 ssh_noprompt heat-admin@$UNDERCLOUD_IP ls /opt/stack/boot-stack.ok
