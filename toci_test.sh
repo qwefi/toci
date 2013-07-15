@@ -87,7 +87,7 @@ export no_proxy=$no_proxy,$UNDERCLOUD_IP
 
 export ELEMENTS_PATH=$TOCI_WORKING_DIR/diskimage-builder/elements:$TOCI_WORKING_DIR/tripleo-image-elements/elements
 # TODO : add back cinder
-$TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -a i386 -o overcloud-control $TOCI_DISTROELEMENT boot-stack heat-localip heat-cfntools stackuser tocihelper
+$TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -a i386 -o overcloud-control $TOCI_DISTROELEMENT boot-stack heat-localip heat-cfntools neutron-network-node stackuser tocihelper
 
 # wait for a successfull os-refresh-config
 wait_for 60 10 ssh_noprompt heat-admin@$UNDERCLOUD_IP ls /opt/stack/boot-stack.ok
@@ -99,7 +99,7 @@ user-config
 setup-baremetal 1 768 10 undercloud
 ssh heat-admin@$UNDERCLOUD_IP "cat /opt/stack/boot-stack/virtual-power-key.pub" >> ~/.ssh/authorized_keys
 
-$TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -a i386 -o overcloud-compute $TOCI_DISTROELEMENT nova-compute neutron-openvswitch-agent heat-localip heat-cfntools stackuser nova-kvm neutron-network-node tocihelper
+$TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -a i386 -o overcloud-compute $TOCI_DISTROELEMENT nova-compute neutron-openvswitch-agent heat-localip heat-cfntools stackuser nova-kvm tocihelper
 
 if [ -d /var/log/upstart ]; then
     wait_for 40 10 ssh_noprompt heat-admin@$UNDERCLOUD_IP grep 'record\\ updated\\ for' /var/log/upstart/nova-compute.log -A 100 \| grep \'Updating host status\'
