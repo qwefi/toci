@@ -72,7 +72,7 @@ if [ $STATUS == 0 ] ; then
 fi
 if [ $STATUS == 0 ] ; then
     mark_time Starting test
-    timeout --foreground 60m ./toci_test.sh > $TOCI_LOG_DIR/test.out 2>&1 || STATUS=1
+    timeout --foreground 90m ./toci_test.sh > $TOCI_LOG_DIR/test.out 2>&1 || STATUS=1
 fi
 if [ ${TOCI_CLEANUP:-1} == 1 ] ; then
     mark_time Starting cleanup
