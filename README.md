@@ -41,13 +41,14 @@ directly to start the setup and tests.
 Using Toci to setup a dev environment
 -------------------------------------
 
-I usualy do this a root, in theory it will also work as a non privilaged user.
+I usualy do this as root, in theory it will also work as a non privilaged user.
 
-    $ git clone https://github.com/toci-dev/toci.git
+    $ git clone https://github.com/qwefi/toci.git
     $ cd toci
     $ vi ~/.toci # Will work without a proxy but a lot slower
     export http_proxy=http://192.168.1.104:8080
-    export https_proxy=http://192.168.1.104:8080
+    # there is currently a problem with pypi abd http proxying
+    # export https_proxy=http://192.168.1.104:8080 
 
 To run toci here is your command, were setting
 TOCI_REMOVE=0 TOCI_CLEANUP=0 so that it doesn't clean up after itself, so befor each run the virsh commands do the cleanup if there are any VM's defined
@@ -57,11 +58,9 @@ TOCI_REMOVE=0 TOCI_CLEANUP=0 so that it doesn't clean up after itself, so befor 
     $ TOCI_REMOVE=0 TOCI_CLEANUP=0 ./toci.sh
 
 Toci will start with a line outputing the working and log directories e.g.
-Starting run Wed  3 Jul 11:46:39 IST 2013 ( /tmp/toci_working_g1Eb2NO /tmp/toci_logs_nGnrhLN )
+Starting run Wed  3 Jul 11:46:39 IST 2013 ( /opt/toci /tmp/toci_logs_nGnrhLN )
 
-On success it echo's 0 to the terminal or 1 on error
-
-Once it ran successfully you should have a running seed node that can be used to start images. also /tmp/toci_working_* can be used as a work directory from which to build/start images e.g.
+Once it ran successfully (ERROR wasn't echo'd to the terminal) you should have a running seed node that can be used to start images. also /opt/toci can be used as a work directory from which to build/start images e.g.
 
     $ . toci_env ; export ELEMENTS_PATH=$TOCI_WORKING_DIR/tripleo-image-elements/elements
     $ TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -u -a i386 -o stackuserimage stackuser
