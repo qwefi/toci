@@ -47,23 +47,16 @@ I usualy do this as root, in theory it will also work as a non privilaged user.
     $ cd toci
     $ vi ~/.toci # Will work without a proxy but a lot slower
     export http_proxy=http://192.168.1.104:8080
-    # there is currently a problem with pypi abd http proxying
-    # export https_proxy=http://192.168.1.104:8080 
 
-To run toci here is your command, were setting
-TOCI_REMOVE=0 TOCI_CLEANUP=0 so that it doesn't clean up after itself, so befor each run the virsh commands do the cleanup if there are any VM's defined
+To run toci here is your command
 
-    $ for NAME in $(virsh list --name --all ); do virsh destroy $NAME ; virsh undefine --remove-all-storage $NAME ; done
-    $ for NAME in $(virsh vol-list default | grep /var/ | awk '{print $1}' ); do virsh vol-delete --pool default $NAME ; done
-    $ TOCI_REMOVE=0 TOCI_CLEANUP=0 ./toci.sh
+    $ ./toci.sh
 
 Toci will start with a line outputing the working and log directories e.g.
 Starting run Wed  3 Jul 11:46:39 IST 2013 ( /opt/toci /tmp/toci_logs_nGnrhLN )
 
-Once it ran successfully (ERROR wasn't echo'd to the terminal) you should have a running seed node that can be used to start images. also /opt/toci can be used as a work directory from which to build/start images e.g.
-
-    $ . toci_env ; export ELEMENTS_PATH=$TOCI_WORKING_DIR/tripleo-image-elements/elements
-    $ TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -u -a i386 -o stackuserimage stackuser
-    $ unset http_proxy ; unset https_proxy ; . ~/seedrc
-    $ $TOCI_WORKING_DIR/incubator/scripts/load-image stackuserimage.qcow2
-    $ nova boot --flavor 256 --key_name default stackuserimage --image  stackuserimage
+Once it ran successfully (ERROR wasn't echo'd to the terminal) you should have
+1. seed vm
+2. undercloud vm
+3. overcloud controller vm
+4. overcloud compute vm

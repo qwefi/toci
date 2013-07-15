@@ -13,10 +13,11 @@ export PYTHONPATH=$(python -c 'import keystoneclient; print keystoneclient.__fil
 export STARTTIME=$(date)
 export TOCI_SOURCE_DIR=$PWD
 
+# Toci defaults
+[ -e tocirc ] && source tocirc
 # env specific to this run, can contain
 # TOCI_RESULTS_SERVER, http_proxy, TOCI_UPLOAD, TOCI_REMOVE,
-source ~/.toci
-source tocirc
+[ -e ~/.toci ] && source ~/.toci
 
 export TOCI_GIT_CHECKOUT
 
@@ -66,6 +67,8 @@ done
 # Add incubator scripts to path
 export PATH=$PATH:$TOCI_WORKING_DIR/incubator/scripts
 
+mark_time Starting pre-cleanup
+timeout --foreground 60m ./toci_cleanup.sh > $TOCI_LOG_DIR/cleanup.out 2>&1
 if [ $STATUS == 0 ] ; then
   mark_time Starting setup
   timeout --foreground 60m ./toci_setup.sh > $TOCI_LOG_DIR/setup.out 2>&1 || STATUS=1
@@ -74,9 +77,9 @@ if [ $STATUS == 0 ] ; then
     mark_time Starting test
     timeout --foreground 90m ./toci_test.sh > $TOCI_LOG_DIR/test.out 2>&1 || STATUS=1
 fi
-if [ ${TOCI_CLEANUP:-1} == 1 ] ; then
+if [ ${TOCI_CLEANUP:-0} == 1 ] ; then
     mark_time Starting cleanup
-    timeout --foreground 60m ./toci_cleanup.sh > $TOCI_LOG_DIR/cleanup.out 2>&1 || STATUS=1
+    timeout --foreground 60m ./toci_cleanup.sh >> $TOCI_LOG_DIR/cleanup.out 2>&1 || STATUS=1
 fi
 mark_time Finished
 
@@ -107,12 +110,13 @@ fi
         send_irc $TOCI_IRC ERROR during toci run, see http://$TOCI_RESULTS_SERVER/toci/$(basename $TOCI_LOG_DIR)/
     fi
 
-if [ ${TOCI_REMOVE:-1} == 1 ] ; then
+if [ ${TOCI_REMOVE:-0} == 1 ] ; then
     rm -rf $TOCI_WORKING_DIR $TOCI_LOG_DIR
 fi
 
 declare | grep -e "^PATH=" -e "^http.*proxy" -e "^TOCI_" -e '^DIB_' | sed  -e 's/^/export /g' > $TOCI_WORKING_DIR/toci_env
-echo 'export no_proxy=$($TOCI_WORKING_DIR/incubator/scripts/get-vm-ip seed)' >> $TOCI_WORKING_DIR/toci_env
+# Some IP we sont want to proxy
+echo 'export no_proxy=$($TOCI_WORKING_DIR/incubator/scripts/get-vm-ip seed),192.0.2.2,192.0.2.5,192.0.2.6,192.0.2.7,192.0.2.8' >> $TOCI_WORKING_DIR/toci_env
 
 if [ $STATUS != 0 ] ; then
     echo ERROR

@@ -33,9 +33,9 @@ if [ -n "$TOCI_MACS" ]; then
     COUNT=$(( $COUNT + 1 ))
   done
 else
-  create-nodes 1 768 10 5
+  create-nodes 1 1536 10 5
   export MACS=$($TOCI_WORKING_DIR/bm_poseur/bm_poseur get-macs)
-  setup-baremetal 1 768 10 seed
+  setup-baremetal 1 1536 10 seed
 fi
 
 # Load images into glance
