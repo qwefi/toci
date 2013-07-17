@@ -4,6 +4,9 @@
 
 patch -v > /dev/null 2>&1 || ERROR "Please install patch"
 make -v > /dev/null 2>&1 || ERROR "Please install make"
+tar --version > /dev/null 2>&1 || ERROR "Please install tar"
+ssh -V > /dev/null 2>&1 || ERROR "Please install openssh-clients"
+which arp > /dev/null 2>&1 || ERROR "Please install net-tools"
 python -c 'import yaml' > /dev/null 2>&1 || ERROR "Please install PyYAML"
 # TODO : why do I need to do this, heat client complains without it
 python -c 'import keystoneclient' || ERROR "Please install python-keystoneclient"
