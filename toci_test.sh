@@ -98,7 +98,7 @@ wait_for 10 5 nova list
 
 user-config
 setup-baremetal 1 1536 30 undercloud
-ssh heat-admin@$UNDERCLOUD_IP "cat /opt/stack/boot-stack/virtual-power-key.pub" >> ~/.ssh/authorized_keys
+ssh_noprompt heat-admin@$UNDERCLOUD_IP "cat /opt/stack/boot-stack/virtual-power-key.pub" >> ~/.ssh/authorized_keys
 
 $TOCI_WORKING_DIR/diskimage-builder/bin/disk-image-create -a i386 -o overcloud-compute $TOCI_DISTROELEMENT nova-compute neutron-openvswitch-agent heat-localip heat-cfntools stackuser nova-kvm tocihelper
 
