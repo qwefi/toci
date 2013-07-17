@@ -132,6 +132,5 @@ wait_for 60 10 ssh_noprompt heat-admin@$OVERCLOUD_IP ls /opt/stack/boot-stack.ok
 # Make sure nova has had a chance to start responding to requests
 wait_for 10 5 nova list
 
-user-config
-
-
+# TODO : this wasn't working, duplicate keypair? 
+#user-config
