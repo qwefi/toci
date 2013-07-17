@@ -83,6 +83,7 @@ wait_for 20 15 ping -c 1 $(nova list | grep undercloud | sed -e "s/.*=\(.*\) .*/
 export UNDERCLOUD_IP=$(nova list | grep ctlplane | sed -e "s/.*=\([0-9.]*\).*/\1/")
 cp $TOCI_WORKING_DIR/incubator/undercloudrc $TOCI_WORKING_DIR/undercloudrc
 source $TOCI_WORKING_DIR/undercloudrc
+sed -i -e "s/\$UNDERCLOUD_IP/$UNDERCLOUD_IP/g" $TOCI_WORKING_DIR/undercloudrc
 export no_proxy=$no_proxy,$UNDERCLOUD_IP
 
 export ELEMENTS_PATH=$TOCI_WORKING_DIR/diskimage-builder/elements:$TOCI_WORKING_DIR/tripleo-image-elements/elements
@@ -120,7 +121,7 @@ sleep 161
 wait_for 40 20 heat list \| grep CREATE_COMPLETE
 
 export OVERCLOUD_IP=$(nova list | grep ctlplane | grep notcompute | sed -e "s/.*=\([0-9.]*\).*/\1/")
-sed -e 's/UNDERCLOUD_IP/OVERCLOUD_IP/g' ./incubator/undercloudrc > overcloudrc
+sed -e "s/$UNDERCLOUD_IP/$OVERCLOUD_IP/g" undercloudrc > overcloudrc
 source $TOCI_WORKING_DIR/overcloudrc
 export no_proxy=$no_proxy,$OVERCLOUD_IP
 
