@@ -13,7 +13,8 @@ A. $ ssh heat-admin@192.0.2.2
 
 **Q. How do I list the nodes making up the overcloud**
 
-    $ . undercloudrc 
+    $ export UNDERCLOUD_IP=192.0.2.2
+    $ . /opt/toci/undercloudrc 
     $ nova list
 
 **Q. How can I create more bm_poseur nodes and add them to my undercloud**
