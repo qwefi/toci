@@ -132,5 +132,8 @@ wait_for 60 10 ssh_noprompt heat-admin@$OVERCLOUD_IP ls /opt/stack/boot-stack.ok
 # Make sure nova has had a chance to start responding to requests
 wait_for 10 5 nova list
 
+# Lets add a cirros image to the overcloud
+curl -L https://launchpad.net/cirros/trunk/0.3.0/+download/cirros-0.3.0-i386-disk.img | glance image-create --name cirros --disk-format qcow2 --container-format bare --is-public 1
+
 # TODO : this wasn't working, duplicate keypair? 
 #user-config
