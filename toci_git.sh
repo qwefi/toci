@@ -14,6 +14,9 @@ for repo in 'qwefi/incubator' 'qwefi/bm_poseur' 'qwefi/diskimage-builder' 'qwefi
     fi
 done
 
+# Get custom forked repositories here
+git clone https://github.com/qwefi/nova.git /opt/toci/nova
+
 # Get a local copy of each of the git repositories  referenced in
 REGEX="^([^ ]+) (git|tar) ([/~][^ ]+) ([^ ]+) ?([^ ]*)$"
 for sr in $TOCI_WORKING_DIR/*/elements/*/source-repository* ; do
